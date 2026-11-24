@@ -171,13 +171,13 @@
     function updateAudioUI(playing) {
         if (playing) {
             if (playerIcon) playerIcon.textContent = '\u275A\u275A';
-            if (playerLabel) playerLabel.textContent = 'Pause Lo-Fi Music';
+            if (playerLabel) playerLabel.textContent = 'Pause Music';
             if (visualizer) visualizer.classList.add('active');
             if (reelLeft) reelLeft.classList.add('spinning');
             if (reelRight) reelRight.classList.add('spinning');
         } else {
             if (playerIcon) playerIcon.textContent = '\u25B6';
-            if (playerLabel) playerLabel.textContent = 'Play Lo-Fi Chill Beats';
+            if (playerLabel) playerLabel.textContent = 'Play Music';
             if (visualizer) visualizer.classList.remove('active');
             if (reelLeft) reelLeft.classList.remove('spinning');
             if (reelRight) reelRight.classList.remove('spinning');
