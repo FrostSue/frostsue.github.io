@@ -11,6 +11,7 @@
     const visualizer = document.getElementById('visualizer');
     const reelLeft = document.getElementById('reel-left');
     const reelRight = document.getElementById('reel-right');
+    const audioElement = document.getElementById('lofi-audio-player');
 
     function applyTheme(theme) {
         if (!themes.includes(theme)) {
@@ -115,99 +116,81 @@
         }
     }
 
-    let audioCtx = null;
-    let rainNode = null;
-    let gainNode = null;
-    let isPlayingAudio = false;
+    let isAudioPlaying = false;
+    let fadeInterval = null;
 
-    function buildLoFiRainNode() {
-        if (!audioCtx) return null;
-        const bufferSize = audioCtx.sampleRate * 2;
-        const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-        const output = noiseBuffer.getChannelData(0);
-        let lastOut = 0.0;
-
-        for (let i = 0; i < bufferSize; i++) {
-            const white = Math.random() * 2 - 1;
-            output[i] = (lastOut + 0.02 * white) / 1.02;
-            lastOut = output[i];
-            output[i] *= 3.5;
-        }
-
-        const whiteNoise = audioCtx.createBufferSource();
-        whiteNoise.buffer = noiseBuffer;
-        whiteNoise.loop = true;
-
-        const lowpassFilter = audioCtx.createBiquadFilter();
-        lowpassFilter.type = 'lowpass';
-        lowpassFilter.frequency.setValueAtTime(800, audioCtx.currentTime);
-
-        const highpassFilter = audioCtx.createBiquadFilter();
-        highpassFilter.type = 'highpass';
-        highpassFilter.frequency.setValueAtTime(150, audioCtx.currentTime);
-
-        whiteNoise.connect(lowpassFilter);
-        lowpassFilter.connect(highpassFilter);
-
-        return { source: whiteNoise, output: highpassFilter };
-    }
-
-    function toggleLoFiAudio() {
-        if (!audioCtx) {
-            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-            audioCtx = new AudioContextClass();
-        }
-
-        if (audioCtx.state === 'suspended') {
-            audioCtx.resume();
-        }
-
-        if (isPlayingAudio) {
-            if (gainNode) {
-                gainNode.gain.setValueAtTime(gainNode.gain.value, audioCtx.currentTime);
-                gainNode.gain.linearRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
-                setTimeout(() => {
-                    if (rainNode) {
-                        try {
-                            rainNode.source.stop();
-                        } catch (e) {}
-                        rainNode = null;
+    function fadeInAudio() {
+        if (!audioElement) return;
+        clearInterval(fadeInterval);
+        audioElement.volume = 0.05;
+        const playPromise = audioElement.play();
+        if (playPromise !== undefined) {
+            playPromise.then(() => {
+                fadeInterval = setInterval(() => {
+                    if (audioElement.volume < 0.65) {
+                        audioElement.volume = Math.min(0.7, audioElement.volume + 0.05);
+                    } else {
+                        clearInterval(fadeInterval);
                     }
-                }, 300);
-            }
-            isPlayingAudio = false;
-            updatePlayerUI(false);
-        } else {
-            gainNode = audioCtx.createGain();
-            gainNode.gain.setValueAtTime(0.001, audioCtx.currentTime);
-            gainNode.gain.linearRampToValueAtTime(0.22, audioCtx.currentTime + 0.5);
-
-            rainNode = buildLoFiRainNode();
-            if (rainNode) {
-                rainNode.output.connect(gainNode);
-                gainNode.connect(audioCtx.destination);
-                rainNode.source.start(0);
-            }
-
-            isPlayingAudio = true;
-            updatePlayerUI(true);
+                }, 80);
+            }).catch(() => {
+                isAudioPlaying = false;
+                updateAudioUI(false);
+            });
         }
     }
 
-    function updatePlayerUI(playing) {
+    function fadeOutAudio() {
+        if (!audioElement) return;
+        clearInterval(fadeInterval);
+        fadeInterval = setInterval(() => {
+            if (audioElement.volume > 0.08) {
+                audioElement.volume = Math.max(0, audioElement.volume - 0.06);
+            } else {
+                audioElement.pause();
+                audioElement.volume = 0.7;
+                clearInterval(fadeInterval);
+            }
+        }, 50);
+    }
+
+    function toggleAudioPlayback() {
+        if (!audioElement) return;
+
+        if (isAudioPlaying) {
+            fadeOutAudio();
+            isAudioPlaying = false;
+            updateAudioUI(false);
+        } else {
+            fadeInAudio();
+            isAudioPlaying = true;
+            updateAudioUI(true);
+        }
+    }
+
+    function updateAudioUI(playing) {
         if (playing) {
             if (playerIcon) playerIcon.textContent = '\u275A\u275A';
-            if (playerLabel) playerLabel.textContent = 'Pause Ambient Rain';
+            if (playerLabel) playerLabel.textContent = 'Pause Lo-Fi Music';
             if (visualizer) visualizer.classList.add('active');
             if (reelLeft) reelLeft.classList.add('spinning');
             if (reelRight) reelRight.classList.add('spinning');
         } else {
             if (playerIcon) playerIcon.textContent = '\u25B6';
-            if (playerLabel) playerLabel.textContent = 'Play Ambient Rain';
+            if (playerLabel) playerLabel.textContent = 'Play Lo-Fi Chill Beats';
             if (visualizer) visualizer.classList.remove('active');
             if (reelLeft) reelLeft.classList.remove('spinning');
             if (reelRight) reelRight.classList.remove('spinning');
         }
+    }
+
+    if (audioElement) {
+        audioElement.addEventListener('ended', () => {
+            if (isAudioPlaying) {
+                audioElement.currentTime = 0;
+                audioElement.play();
+            }
+        });
     }
 
     window.addEventListener('resize', () => {
@@ -234,6 +217,6 @@
     }
 
     if (audioToggleBtn) {
-        audioToggleBtn.addEventListener('click', toggleLoFiAudio);
+        audioToggleBtn.addEventListener('click', toggleAudioPlayback);
     }
 })();
