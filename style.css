@@ -1,13 +1,13 @@
 :root {
-    --bg-color: #16161e;
-    --card-bg: rgba(26, 27, 38, 0.75);
-    --text-color: #c0caf5;
-    --text-dim: #7aa2f7;
+    --bg-color: #19101f;
+    --card-bg: rgba(43, 24, 52, 0.75);
+    --text-color: #fce7f3;
+    --text-dim: #f472b6;
     --text-bright: #ffffff;
-    --accent: #bb9af7;
-    --border-color: rgba(122, 162, 247, 0.2);
-    --glow: rgba(187, 154, 247, 0.3);
-    --tag-bg: rgba(122, 162, 247, 0.12);
+    --accent: #f43f5e;
+    --border-color: rgba(244, 114, 182, 0.25);
+    --glow: rgba(244, 63, 94, 0.3);
+    --tag-bg: rgba(244, 114, 182, 0.15);
 }
 
 [data-theme="tokyonight"] {
