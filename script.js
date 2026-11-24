@@ -1,5 +1,5 @@
 (function () {
-    const themes = ['tokyonight', 'sakura', 'kyoto', 'cyberpunk', 'latte'];
+    const themes = ['sakura', 'tokyonight', 'kyoto', 'cyberpunk', 'latte'];
     const themeToggleBtn = document.getElementById('theme-toggle');
     const themeNameSpan = document.getElementById('theme-name');
     const sakuraToggleBtn = document.getElementById('sakura-toggle');
@@ -15,7 +15,7 @@
 
     function applyTheme(theme) {
         if (!themes.includes(theme)) {
-            theme = 'tokyonight';
+            theme = 'sakura';
         }
         document.body.setAttribute('data-theme', theme);
         if (themeNameSpan) {
@@ -198,7 +198,7 @@
         initPetals();
     });
 
-    const savedTheme = localStorage.getItem('frostsue_theme') || 'tokyonight';
+    const savedTheme = localStorage.getItem('frostsue_theme') || 'sakura';
     const savedSakura = localStorage.getItem('frostsue_sakura') !== 'false';
 
     applyTheme(savedTheme);
